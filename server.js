@@ -69,6 +69,7 @@ app.get("/number", (req, res) => {
 });
 
 const cameraConfigPath = "../data/cameras.json";
+const dataPath = "../data";
 
 function getCameraConfig() {
   let rawdata = fs.readFileSync(cameraConfigPath);
@@ -78,6 +79,26 @@ function getCameraConfig() {
 app.get("/cameras", (req, res) => {
   console.log("Incoming Request on cameras");
   res.send(getCameraConfig());
+});
+
+app.get("/video", function (req, res) {
+  const cameraConfig = getCameraConfig();
+  const camName = req.query.name;
+  print("looking for video for camera: " + camName);
+  const path = dataPath + "/" + camName;
+  const files = fs.readdirSync(path);
+  const firstFile = undefined;
+  for (var i in files) {
+    const file = files[i];
+    if (
+      path.extname(file).includes(camName) &&
+      path.extname(file).includes(".mkv")
+    ) {
+      firstFile = file;
+    }
+  }
+  res.send(file);
+  //res.download(file); // Set disposition and send it.
 });
 
 setInterval(incNumber, 2000);
