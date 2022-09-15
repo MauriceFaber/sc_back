@@ -70,7 +70,7 @@ app.get("/number", (req, res) => {
 });
 
 const cameraConfigPath = "../data/cameras.json";
-const dataPath = "../data";
+const dataPath = "/home/odroid/webcams/data";
 
 function getCameraConfig() {
   let rawdata = fs.readFileSync(cameraConfigPath);
