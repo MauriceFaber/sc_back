@@ -1,6 +1,7 @@
 const express = require("express");
 var fs = require("fs");
 const app = express();
+var path = require("path");
 
 const PORT = 3000;
 
@@ -85,8 +86,8 @@ app.get("/video", function (req, res) {
   const cameraConfig = getCameraConfig();
   const camName = req.query.name;
   console.log("looking for video for camera: " + camName);
-  const path = dataPath + "/" + camName;
-  const files = fs.readdirSync(path);
+  const dirpath = dataPath + "/" + camName;
+  const files = fs.readdirSync(dirpath);
   const firstFile = undefined;
   for (var i in files) {
     const file = files[i];
