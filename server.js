@@ -129,7 +129,7 @@ app.get("/video", function (req, res) {
   console.log("looking for video for camera: " + camName);
   const dirpath = dataPath + "/" + camName;
   const filePath = dirpath + "/" + videoName;
-  res.download(filePath); // Set disposition and send it.
+  res.sendFile(filePath); // Set disposition and send it.
 });
 
 setInterval(incNumber, 5000);
