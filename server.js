@@ -87,13 +87,14 @@ app.get("/video", function (req, res) {
   const camName = req.query.name;
   console.log("looking for video for camera: " + camName);
   const dirpath = dataPath + "/" + camName;
-  const files = fs.readdirSync(dirpath);
+  const files = fs.readdirSync(dirpath).reverse();
   var firstFile = undefined;
   console.log(files);
   for (var i in files) {
     const file = files[i];
     console.log(file);
-    if (file.includes(camName) && file.includes(".mkv")) {
+    if (file.includes(camName) && file.includes(".mkv_")) {
+    } else if (file.includes(camName) && file.includes(".mkv")) {
       firstFile = file;
       break;
     }
