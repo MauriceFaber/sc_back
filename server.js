@@ -123,7 +123,7 @@ app.get("/videos", function (req, res) {
   res.send(toSend); // Set disposition and send it.
 });
 
-app.get("/video.mkv", function (req, res) {
+app.get("/video.mp4", function (req, res) {
   const camName = req.query.name;
   const videoName = req.query.video;
   console.log("looking for video for camera: " + camName);
