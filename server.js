@@ -84,7 +84,7 @@ function addCameraConfig(name, url) {
     return false;
   } else {
     config.push({ name: name, url: url });
-    fs.writeFileSync(cameraConfigPath, config);
+    fs.writeFileSync(cameraConfigPath, JSON.stringify(config));
     return true;
   }
 }
