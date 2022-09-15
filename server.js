@@ -84,7 +84,7 @@ app.get("/cameras", (req, res) => {
 app.get("/video", function (req, res) {
   const cameraConfig = getCameraConfig();
   const camName = req.query.name;
-  print("looking for video for camera: " + camName);
+  console.log("looking for video for camera: " + camName);
   const path = dataPath + "/" + camName;
   const files = fs.readdirSync(path);
   const firstFile = undefined;
