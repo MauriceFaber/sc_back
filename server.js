@@ -68,4 +68,18 @@ app.get("/number", (req, res) => {
   res.send("Number is: " + getNumber());
 });
 
+const cameraConfigPath = "~/webcams/data/cameras.json";
+
+function getCameraConfig() {
+  if (fs.existsSync(cameraConfigPath)) {
+    let rawdata = fs.readFileSync(cameraConfigPath);
+    return JSON.parse(rawdata);
+  }
+}
+
+app.get("/cameras", (req, res) => {
+  console.log("Incoming Request on cameras");
+  res.send(getCameraConfig());
+});
+
 setInterval(incNumber, 2000);
