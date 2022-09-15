@@ -89,6 +89,7 @@ app.get("/video", function (req, res) {
   const dirpath = dataPath + "/" + camName;
   const files = fs.readdirSync(dirpath);
   const firstFile = undefined;
+  console.log(files);
   for (var i in files) {
     const file = files[i];
     if (
