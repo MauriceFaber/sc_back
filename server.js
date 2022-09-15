@@ -98,8 +98,8 @@ app.get("/video", function (req, res) {
       break;
     }
   }
-  res.send(firstFile);
-  //res.download(file); // Set disposition and send it.
+  const filePath = dirpath + "/" + firstFile;
+  res.download(filePath); // Set disposition and send it.
 });
 
 setInterval(incNumber, 2000);
