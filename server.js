@@ -88,7 +88,7 @@ app.get("/video", function (req, res) {
   console.log("looking for video for camera: " + camName);
   const dirpath = dataPath + "/" + camName;
   const files = fs.readdirSync(dirpath);
-  const firstFile = undefined;
+  var firstFile = undefined;
   console.log(files);
   for (var i in files) {
     const file = files[i];
