@@ -68,7 +68,7 @@ app.get("/number", (req, res) => {
   res.send("Number is: " + getNumber());
 });
 
-const cameraConfigPath = "~/webcams/data/cameras.json";
+const cameraConfigPath = "../data/cameras.json";
 
 function getCameraConfig() {
   let rawdata = fs.readFileSync(cameraConfigPath);
