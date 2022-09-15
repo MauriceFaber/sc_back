@@ -71,10 +71,8 @@ app.get("/number", (req, res) => {
 const cameraConfigPath = "~/webcams/data/cameras.json";
 
 function getCameraConfig() {
-  if (fs.existsSync(cameraConfigPath)) {
-    let rawdata = fs.readFileSync(cameraConfigPath);
-    return JSON.parse(rawdata);
-  }
+  let rawdata = fs.readFileSync(cameraConfigPath);
+  return JSON.parse(rawdata);
 }
 
 app.get("/cameras", (req, res) => {
