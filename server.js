@@ -79,8 +79,14 @@ function getCameraConfig() {
 
 function addCameraConfig(name, url) {
   var config = getCameraConfig();
-  config.push({ name: name, url: url });
-  fs.writeFileSync(cameraConfigPath, config);
+  if (config.find((cam) => cam.name === name || cam.url === url)) {
+    console.log("CAM ALREADY EXISTS");
+    return false;
+  } else {
+    config.push({ name: name, url: url });
+    fs.writeFileSync(cameraConfigPath, config);
+    return true;
+  }
 }
 
 app.get("/cameras", (req, res) => {
@@ -91,8 +97,11 @@ app.get("/cameras", (req, res) => {
 app.post("/cameraConfig", (req, res) => {
   const name = req.query.name;
   const url = req.query.url;
-  console.log(name, url);
-  res.send({ name, url });
+  var result = false;
+  if (name && name.length > 0 && url && url.length > 0) {
+    result = addCameraConfig(name, url);
+  }
+  res.send(result ? { name, url } : { message: "already exists" });
 });
 
 app.get("/videos", function (req, res) {
