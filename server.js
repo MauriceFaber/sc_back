@@ -77,9 +77,22 @@ function getCameraConfig() {
   return JSON.parse(rawdata);
 }
 
+function addCameraConfig(name, url) {
+  var config = getCameraConfig();
+  config.push({ name: name, url: url });
+  fs.writeFileSync(cameraConfigPath, config);
+}
+
 app.get("/cameras", (req, res) => {
   console.log("Incoming Request on cameras");
   res.send(getCameraConfig());
+});
+
+app.post("/cameraConfig", (req, res) => {
+  const name = req.query.name;
+  const url = req.query.url;
+  console.log(name, url);
+  res.send({ name, url });
 });
 
 app.get("/videos", function (req, res) {
