@@ -82,25 +82,32 @@ app.get("/cameras", (req, res) => {
   res.send(getCameraConfig());
 });
 
-app.get("/video", function (req, res) {
-  const cameraConfig = getCameraConfig();
+app.get("/videos", function (req, res) {
   const camName = req.query.name;
   console.log("looking for video for camera: " + camName);
   const dirpath = dataPath + "/" + camName;
   const files = fs.readdirSync(dirpath).reverse();
-  var firstFile = undefined;
-  console.log(files);
+
+  var toSend = [];
+
   for (var i in files) {
     const file = files[i];
     console.log(file);
     if (file.includes(camName) && file.includes(".mkv_")) {
     } else if (file.includes(camName) && file.includes(".mkv")) {
-      firstFile = file;
-      break;
+      toSend.push(file);
     }
   }
-  const filePath = dirpath + "/" + firstFile;
+  res.send(toSend); // Set disposition and send it.
+});
+
+app.get("/video", function (req, res) {
+  const camName = req.query.name;
+  const videoName = req.query.video;
+  console.log("looking for video for camera: " + camName);
+  const dirpath = dataPath + "/" + camName;
+  const filePath = dirpath + "/" + videoName;
   res.download(filePath); // Set disposition and send it.
 });
 
-setInterval(incNumber, 2000);
+setInterval(incNumber, 5000);
