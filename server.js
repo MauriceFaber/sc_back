@@ -92,14 +92,13 @@ app.get("/video", function (req, res) {
   console.log(files);
   for (var i in files) {
     const file = files[i];
-    if (
-      path.extname(file).includes(camName) &&
-      path.extname(file).includes(".mkv")
-    ) {
+    console.log(file);
+    if (file.includes(camName) && file.includes(".mkv")) {
       firstFile = file;
+      break;
     }
   }
-  res.send(file);
+  res.send(firstFile);
   //res.download(file); // Set disposition and send it.
 });
 
