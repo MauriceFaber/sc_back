@@ -106,7 +106,7 @@ app.post("/cameraConfig", (req, res) => {
 
 app.get("/videos", function (req, res) {
   const camName = req.query.name;
-  console.log("looking for video for camera: " + camName);
+  console.log("/videos for camera: " + camName);
   const dirpath = dataPath + "/" + camName;
   const files = fs.readdirSync(dirpath).reverse();
 
@@ -130,6 +130,42 @@ app.get("/video.mp4", function (req, res) {
   const dirpath = dataPath + "/" + camName;
   const filePath = dirpath + "/" + videoName;
   res.sendFile(filePath); // Set disposition and send it.
+});
+
+app.get("/current", function (req, res) {
+  const camName = req.query.name;
+  console.log("looking for current frame for camera: " + camName);
+  const dirpath = dataPath + "/" + camName;
+  const filePath = dirpath + "/currentFrame.jpg";
+  res.sendFile(filePath);
+});
+
+app.get("/stream", function (req, res) {
+  const range = req.headers.range;
+  if (!range) {
+    res.status(400).send("Requires Range header");
+    return;
+  }
+  const camName = req.query.name;
+  const videoName = req.query.video;
+  console.log("looking for stream for camera: " + camName);
+  const dirpath = dataPath + "/" + camName;
+  const filePath = dirpath + "/" + videoName;
+
+  const videoSize = fs.statSync(filePath).size;
+  const CHUNK_SIZE = 10 ** 6; // 1MB
+  const start = Number(range.replace(/\D/g, ""));
+  const end = Math.min(start + CHUNK_SIZE, videoSize - 1);
+
+  const headers = {
+    "Content-Range": `bytes ${start}-${end}/${videoSize}`,
+    "Accept-Ranges": "bytes",
+    "Content-Length": contentLength,
+    "Content-Type": "video/mp4",
+  };
+  res.writeHead(206, headers);
+  const videoStream = fs.createReadStream(videoPath, { start, end });
+  videoStream.pipe(res);
 });
 
 setInterval(incNumber, 5000);
