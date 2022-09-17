@@ -172,13 +172,16 @@ app.get("/stream", function (req, res) {
   const videoSize = fs.statSync(filePath).size;
 
   const range = req.headers.range;
-  if (!range) {
-    res.writeHead(416, { "Content-Range": `bytes */${videoSize}` });
-    return res.end();
-  }
+//   if (!range) {
+//     res.writeHead(416, { "Content-Range": `bytes */${videoSize}` });
+//     return res.end();
+//   }
 
   const CHUNK_SIZE = 10 ** 6; // 1MB
-  const start = Number(range.replace(/\D/g, ""));
+  var start = 0
+  if(range){
+	start = Number(range.replace(/\D/g, ""));
+  }
   const end = Math.min(start + CHUNK_SIZE, videoSize - 1);
   const contentLength = end - start + 1;
 
@@ -189,7 +192,7 @@ app.get("/stream", function (req, res) {
     "Content-Type": "video/mp4",
   };
   res.writeHead(206, headers);
-  const videoStream = fs.createReadStream(videoPath, { start, end });
+  const videoStream = fs.createReadStream(filePath, { start, end });
   videoStream.pipe(res);
 });
 
