@@ -115,22 +115,20 @@ app.get("/dirSize", function (req, res) {
   fastFolderSize(dirpath, (err, bytes) => {
     if (err) throw err;
 
-	fastFolderSize(framespath, (errr, bytes2)=> {
-		if (errr) throw errr;
+    fastFolderSize(framespath, (errr, bytes2) => {
+      if (errr) throw errr;
 
-		size = Math.round(((bytes - bytes2) / 1000000.0) * 100) / 100 + " MB";
+      size = Math.round(((bytes - bytes2) / 1000000.0) * 100) / 100 + " MB";
 
-		console.log(size);
-	  	res.send(size); // Set disposition and send it.
-	});
-
-});
-
+      console.log(size);
+      res.send(size); // Set disposition and send it.
+    });
+  });
 });
 
 app.get("/videos", function (req, res) {
   const camName = req.query.name;
-//   console.log("/videos for camera: " + camName);
+  //   console.log("/videos for camera: " + camName);
   const dirpath = dataPath + "/" + camName;
   const files = fs.readdirSync(dirpath).reverse();
 
@@ -150,7 +148,7 @@ app.get("/videos", function (req, res) {
 app.get("/video.mp4", function (req, res) {
   const camName = req.query.name;
   const videoName = req.query.video;
-//   console.log("looking for video for camera: " + camName);
+  //   console.log("looking for video for camera: " + camName);
   const dirpath = dataPath + "/" + camName;
   const filePath = dirpath + "/" + videoName;
   res.sendFile(filePath); // Set disposition and send it.
@@ -165,21 +163,24 @@ app.get("/current", function (req, res) {
 });
 
 app.get("/stream", function (req, res) {
-  const range = req.headers.range;
-  if (!range) {
-    res.status(400).send("Requires Range header");
-    return;
-  }
   const camName = req.query.name;
   const videoName = req.query.video;
-//   console.log("looking for stream for camera: " + camName);
+  //   console.log("looking for stream for camera: " + camName);
   const dirpath = dataPath + "/" + camName;
   const filePath = dirpath + "/" + videoName;
 
   const videoSize = fs.statSync(filePath).size;
+
+  const range = req.headers.range;
+  if (!range) {
+    res.writeHead(416, { "Content-Range": `bytes */${videoSize}` });
+    return res.end();
+  }
+
   const CHUNK_SIZE = 10 ** 6; // 1MB
   const start = Number(range.replace(/\D/g, ""));
   const end = Math.min(start + CHUNK_SIZE, videoSize - 1);
+  const contentLength = end - start + 1;
 
   const headers = {
     "Content-Range": `bytes ${start}-${end}/${videoSize}`,
