@@ -109,19 +109,28 @@ app.get("/dirSize", function (req, res) {
   const camName = req.query.name;
   console.log("/size for camera: " + camName);
   const dirpath = dataPath + "/" + camName;
+  const framespath = dirpath + "/frames";
 
-  var size = 0;
+  var size = "0 bytes";
   fastFolderSize(dirpath, (err, bytes) => {
     if (err) throw err;
-    size = bytes;
-  });
 
-  res.send(size); // Set disposition and send it.
+	fastFolderSize(framespath, (errr, bytes2)=> {
+		if (errr) throw errr;
+
+		size = Math.round(((bytes - bytes2) / 1000000.0) * 100) / 100 + " MB";
+
+		console.log(size);
+	  	res.send(size); // Set disposition and send it.
+	});
+
+});
+
 });
 
 app.get("/videos", function (req, res) {
   const camName = req.query.name;
-  console.log("/videos for camera: " + camName);
+//   console.log("/videos for camera: " + camName);
   const dirpath = dataPath + "/" + camName;
   const files = fs.readdirSync(dirpath).reverse();
 
@@ -129,7 +138,7 @@ app.get("/videos", function (req, res) {
 
   for (var i in files) {
     const file = files[i];
-    console.log(file);
+    // console.log(file);
     if (file.includes(camName) && file.includes(".mkv_")) {
     } else if (file.includes(camName) && file.includes(".mkv")) {
       toSend.push(file);
@@ -141,7 +150,7 @@ app.get("/videos", function (req, res) {
 app.get("/video.mp4", function (req, res) {
   const camName = req.query.name;
   const videoName = req.query.video;
-  console.log("looking for video for camera: " + camName);
+//   console.log("looking for video for camera: " + camName);
   const dirpath = dataPath + "/" + camName;
   const filePath = dirpath + "/" + videoName;
   res.sendFile(filePath); // Set disposition and send it.
@@ -163,7 +172,7 @@ app.get("/stream", function (req, res) {
   }
   const camName = req.query.name;
   const videoName = req.query.video;
-  console.log("looking for stream for camera: " + camName);
+//   console.log("looking for stream for camera: " + camName);
   const dirpath = dataPath + "/" + camName;
   const filePath = dirpath + "/" + videoName;
 
@@ -183,4 +192,4 @@ app.get("/stream", function (req, res) {
   videoStream.pipe(res);
 });
 
-setInterval(incNumber, 5000);
+// setInterval(incNumber, 5000);
