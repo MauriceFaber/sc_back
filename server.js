@@ -2,6 +2,7 @@ const express = require("express");
 var fs = require("fs");
 const app = express();
 var path = require("path");
+const fastFolderSize = require("fast-folder-size");
 
 const PORT = 3000;
 
@@ -102,6 +103,20 @@ app.post("/cameraConfig", (req, res) => {
     result = addCameraConfig(name, url);
   }
   res.send(result ? { name, url } : { message: "already exists" });
+});
+
+app.get("/dirSize", function (req, res) {
+  const camName = req.query.name;
+  console.log("/size for camera: " + camName);
+  const dirpath = dataPath + "/" + camName;
+
+  var size = 0;
+  fastFolderSize(dirpath, (err, bytes) => {
+    if (err) throw err;
+    size = bytes;
+  });
+
+  res.send(size); // Set disposition and send it.
 });
 
 app.get("/videos", function (req, res) {
