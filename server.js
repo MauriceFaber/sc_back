@@ -3,8 +3,12 @@ var fs = require("fs");
 const app = express();
 var path = require("path");
 const fastFolderSize = require("fast-folder-size");
+var cors = require('cors')
 
-const PORT = 3000;
+require("dotenv").config();
+
+const PORT = process.env.PORT || 3000;
+app.use(cors())
 
 app.listen(PORT, () => {
   console.log(`Listening on ${PORT}...`);
@@ -171,7 +175,15 @@ app.get("/stream", function (req, res) {
 
   const videoSize = fs.statSync(filePath).size;
 
+  console.log("VideoSize: ", videoSize);
+
   const range = req.headers.range;
+//   console.log(req.headers)
+  if(range){
+	console.log("GivenRange: ", range);
+  }else{
+	console.log("No range given");
+  }
 //   if (!range) {
 //     res.writeHead(416, { "Content-Range": `bytes */${videoSize}` });
 //     return res.end();
@@ -186,7 +198,7 @@ app.get("/stream", function (req, res) {
   const contentLength = end - start + 1;
 
   const headers = {
-    "Content-Range": `bytes ${start}-${end}/${videoSize}`,
+    "Content-Range": `bytes=${start}-${end}/${videoSize}`,
     "Accept-Ranges": "bytes",
     "Content-Length": contentLength,
     "Content-Type": "video/mp4",
