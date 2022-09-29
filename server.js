@@ -166,46 +166,147 @@ app.get("/current", function (req, res) {
   res.sendFile(filePath);
 });
 
-app.get("/stream", function (req, res) {
-  const camName = req.query.name;
-  const videoName = req.query.video;
-  //   console.log("looking for stream for camera: " + camName);
-  const dirpath = dataPath + "/" + camName;
-  const filePath = dirpath + "/" + videoName;
 
-  const videoSize = fs.statSync(filePath).size;
+// app.get("/stream", function (req, res) {
+//   const camName = req.query.name;
+//   const videoName = req.query.video;
+//   //   console.log("looking for stream for camera: " + camName);
+//   const dirpath = dataPath + "/" + camName;
+//   const filePath = dirpath + "/" + videoName;
 
-  console.log("VideoSize: ", videoSize);
+//   const videoSize = fs.statSync(filePath).size;
 
-  const range = req.headers.range;
-//   console.log(req.headers)
-  if(range){
-	console.log("GivenRange: ", range);
-  }else{
-	console.log("No range given");
-  }
-//   if (!range) {
-//     res.writeHead(416, { "Content-Range": `bytes */${videoSize}` });
-//     return res.end();
+//   const range = req.headers.range;
+// //   console.log(req.headers)
+//   if(range){
+// 	console.log("GivenRange: ", range);
 //   }
+// //   if (!range) {
+// //     res.writeHead(416, { "Content-Range": `bytes */${videoSize}` });
+// //     return res.end();
+// //   }
 
-  const CHUNK_SIZE = 10 ** 6; // 1MB
-  var start = 0
-  if(range){
-	start = Number(range.replace(/\D/g, ""));
-  }
-  const end = Math.min(start + CHUNK_SIZE, videoSize - 1);
-  const contentLength = end - start + 1;
+//    let parts = range.split('=')[1]
+//    let start = Number(parts.split('-')[0])
+//    let end = Number(parts.split('-')[1])
 
-  const headers = {
-    "Content-Range": `bytes=${start}-${end}/${videoSize}`,
-    "Accept-Ranges": "bytes",
-    "Content-Length": contentLength,
-    "Content-Type": "video/mp4",
-  };
-  res.writeHead(206, headers);
-  const videoStream = fs.createReadStream(filePath, { start, end });
-  videoStream.pipe(res);
+//    //For Chrome
+//    if (!end) {
+//        const CHUNK_SIZE = 10 ** 6
+//        end = Math.min(start + CHUNK_SIZE, videoSize - 1)
+//    } 
+
+//   const contentLength = end - start + 1;
+//   const videoStream = fs.createReadStream(filePath, { start, end });
+
+//   const headers = {
+// 	"Content-Range": `bytes ${start}-${end}/${videoSize}`,
+// 	"Accept-Ranges": "bytes",
+// 	"Content-Length": contentLength,
+// 	"Content-Type": "video/mp4",
+//   };
+
+//   if(req.method === "HEAD") {
+// 	console.log("HEADING!");
+//   	res.writeHead(200, headers);
+//   	res.end();
+//   }else {
+// 	res.writeHead(206, headers);
+// 	console.log("responding: ", start, end);
+//   	videoStream.pipe(res);
+// 	}
+// });
+
+app.get('/stream', (req, res) => {
+
+	const camName = req.query.name;
+	const videoName = req.query.video;
+	//   console.log("looking for stream for camera: " + camName);
+	const dirpath = dataPath + "/" + camName;
+	const filePath = dirpath + "/" + videoName;
+
+    // Listing 3.
+    const options = {};
+
+    let start;
+    let end;
+
+    const range = req.headers.range;
+    if (range) {
+        const bytesPrefix = "bytes=";
+        if (range.startsWith(bytesPrefix)) {
+            const bytesRange = range.substring(bytesPrefix.length);
+            const parts = bytesRange.split("-");
+            if (parts.length === 2) {
+                const rangeStart = parts[0] && parts[0].trim();
+                if (rangeStart && rangeStart.length > 0) {
+                    options.start = start = parseInt(rangeStart);
+                }
+                const rangeEnd = parts[1] && parts[1].trim();
+                if (rangeEnd && rangeEnd.length > 0) {
+                    options.end = end = parseInt(rangeEnd);
+                }
+            }
+        }
+    }
+
+    res.setHeader("content-type", "video/mp4");
+
+    fs.stat(filePath, (err, stat) => {
+        if (err) {
+            console.error(`File stat error for ${filePath}.`);
+            console.error(err);
+            res.sendStatus(500);
+            return;
+        }
+
+        let contentLength = stat.size;
+
+        // Listing 4.
+        if (req.method === "HEAD") {
+            res.statusCode = 200;
+            res.setHeader("accept-ranges", "bytes");
+            res.setHeader("content-length", contentLength);
+            res.end();
+        }
+        else {       
+            // Listing 5.
+            let retrievedLength;
+            if (start !== undefined && end !== undefined) {
+                retrievedLength = (end+1) - start;
+            }
+            else if (start !== undefined) {
+                retrievedLength = contentLength - start;
+            }
+            else if (end !== undefined) {
+                retrievedLength = (end+1);
+            }
+            else {
+                retrievedLength = contentLength;
+            }
+
+            // Listing 6.
+            res.statusCode = start !== undefined || end !== undefined ? 206 : 200;
+
+            res.setHeader("content-length", retrievedLength);
+
+            if (range !== undefined) {  
+                res.setHeader("content-range", `bytes ${start || 0}-${end || (contentLength-1)}/${contentLength}`);
+                res.setHeader("accept-ranges", "bytes");
+            }
+
+            // Listing 7.
+            const fileStream = fs.createReadStream(filePath, options);
+            fileStream.on("error", error => {
+                console.log(`Error reading file ${filePath}.`);
+                console.log(error);
+                res.sendStatus(500);
+            });
+
+
+            fileStream.pipe(res);
+        }
+    });
 });
 
 // setInterval(incNumber, 5000);
